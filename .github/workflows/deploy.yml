@@ -37,7 +37,7 @@ jobs:
             echo "--- Server-এ প্রবেশ করা হয়েছে ---"
             
             # আপনার সার্ভারে প্রজেক্টটি যে ফোল্ডারে আছে সেখানে যান (পাথটি চেঞ্জ করুন)
-            cd /var/www/my-express-app 
+            cd /home/sys-admin/test-1 
             
             # লেটেস্ট কোড পুল করুন
             git pull origin main
@@ -46,6 +46,6 @@ jobs:
             npm install --production
             
             # PM2 দিয়ে অ্যাপটি রিস্টার্ট করুন (আপনার app.js বা server.js এর নাম দিন)
-            pm2 restart app.js || pm2 start app.js --name "my-express-app"
+            pm2 restart index.js || pm2 start index.js --name "test-1"
             
             echo "--- ডেপ্লয়মেন্ট সফলভাবে সম্পন্ন হয়েছে! ---"
