@@ -1,0 +1,51 @@
+name: Node Express VPS Deploy
+
+# ১. কখন পাইপলাইন চলবে?
+on:
+  push:
+    branches:
+      - main  # আপনি চাইলে master বা অন্য ব্রাঞ্চ দিতে পারেন
+
+# ২. কী কী কাজ হবে?
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ধাপ ১: গিটহাবের লিনাক্সে কোড নিয়ে আসা
+      - name: Checkout Repository Code
+        uses: actions/checkout@v4
+
+      # ধাপ ২: নোড ইনস্টল ও টেস্ট করা (ঐচ্ছিক কিন্তু ভালো প্র্যাকটিস)
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.14.1' # আপনার প্রজেক্টের নোড ভার্সন দিন
+
+      - name: Install local dependencies
+        run: npm install
+
+      # 🚀 ধাপ ৩: সার্ভারে কানেক্ট হয়ে ডেপ্লয় করা
+      - name: Executing remote ssh commands using ssh-key
+        uses: appleboy/ssh-action@v1.0.3  # এটি একটি চমৎকার রেডিমেড অ্যাকশন
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22  # এসএসএইচ পোর্ট
+          script: |
+            echo "--- Server-এ প্রবেশ করা হয়েছে ---"
+            
+            # আপনার সার্ভারে প্রজেক্টটি যে ফোল্ডারে আছে সেখানে যান (পাথটি চেঞ্জ করুন)
+            cd /var/www/my-express-app 
+            
+            # লেটেস্ট কোড পুল করুন
+            git pull origin main
+            
+            # নতুন কোনো প্যাকেজ থাকলে তা ইনস্টল করুন
+            npm install --production
+            
+            # PM2 দিয়ে অ্যাপটি রিস্টার্ট করুন (আপনার app.js বা server.js এর নাম দিন)
+            pm2 restart app.js || pm2 start app.js --name "my-express-app"
+            
+            echo "--- ডেপ্লয়মেন্ট সফলভাবে সম্পন্ন হয়েছে! ---"
